@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -73,6 +74,9 @@ func handleUrls(urls []string, cookie string) {
 	client := &http.Client{}
 
 	for _, articleUrl := range urls {
+		// request slowly
+		time.Sleep(time.Second * 1)
+
 		// create http header
 		header := http.Header{
 			"Cookie":       []string{cookie},
