@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"os"
-	"zhihu/script"
+	"zhihu/browser"
 
 	"github.com/sirupsen/logrus"
 )
@@ -18,6 +18,44 @@ func init() {
 	})
 }
 
+func execute() {
+	// Create browser instance
+	b, err := browser.NewBrowser(false) // false means show browser window
+	if err != nil {
+		log.Errorf("Failed to create browser: %v", err)
+		return
+	}
+	defer b.Close()
+
+	// Wait for user login
+	if err := b.WaitForLogin(); err != nil {
+		log.Errorf("Login failed: %v", err)
+		return
+	}
+
+	// Read article URLs
+	file, err := os.Open("urls.txt")
+	if err != nil {
+		log.Errorf("Failed to open article URL file: %v", err)
+		return
+	}
+	defer file.Close()
+
+	// Get URL list
+	articleUrls := []string{}
+	urlScanner := bufio.NewScanner(file)
+	for urlScanner.Scan() {
+		url := urlScanner.Text()
+		articleUrls = append(articleUrls, url)
+	}
+
+	// Execute voting
+	if err := b.Vote(articleUrls); err != nil {
+		log.Errorf("Voting failed: %v", err)
+		return
+	}
+}
+
 func main() {
 	// Check if urls.txt exists
 	_, err := os.Open("urls.txt")
@@ -26,7 +64,7 @@ func main() {
 		return
 	}
 
-	script.Execute()
+	execute()
 
 	log.Info("Press Enter to exit...")
 	reader := bufio.NewReader(os.Stdin)
