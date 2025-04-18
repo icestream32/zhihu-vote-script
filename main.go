@@ -3,11 +3,8 @@ package main
 import (
 	"bufio"
 	"os"
-	"time"
-	"zhihu/chrome"
 	"zhihu/script"
 
-	"github.com/djherbis/times"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,46 +18,17 @@ func init() {
 	})
 }
 
-func check() {
-	// read urls.txt
+func main() {
+	// Check if urls.txt exists
 	_, err := os.Open("urls.txt")
 	if err != nil {
-		log.Error("Cannot found file: urls.txt")
+		log.Error("File not found: urls.txt")
+		return
 	}
-
-	// read cookie.txt
-	file, err := os.Open("cookie.txt")
-	if err != nil {
-		log.Warn("Cannot open cookie file, execute login...")
-		chrome.GetCookies()
-
-		// read cookie.txt again
-		file, err = os.Open("cookie.txt")
-		if err != nil {
-			log.Errorf("Failed to open cookie file: %v", err)
-			return
-		}
-	}
-	defer file.Close()
-
-	// get file brithtime
-	var birthTime time.Time
-	if t, err := times.Stat(file.Name()); err == nil && t.HasBirthTime() {
-		birthTime = t.BirthTime()
-	}
-
-	if birthTime.Before(time.Now().Add(-1 * time.Hour * 24)) {
-		log.Warn("Cookie expired, execute login...")
-		chrome.GetCookies()
-	}
-}
-
-func main() {
-	check()
 
 	script.Execute()
 
-	log.Info("Press Enter to continue...")
+	log.Info("Press Enter to exit...")
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
 }

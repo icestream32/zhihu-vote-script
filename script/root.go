@@ -4,16 +4,18 @@ import (
 	"bufio"
 	"os"
 
+	"zhihu/browser"
+
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	authority   = "www.zhihu.com"
-	origin      = "https://zhuanlan.zhihu.com"
-	contentType = "application/json"
-	userAgent   = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
-	baseApiUrl  = "https://www.zhihu.com/api/v4/articles/"
-)
+// const (
+// 	authority   = "www.zhihu.com"
+// 	origin      = "https://zhuanlan.zhihu.com"
+// 	contentType = "application/json"
+// 	userAgent   = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+// 	baseApiUrl  = "https://www.zhihu.com/api/v4/articles/"
+// )
 
 var log = logrus.New()
 
@@ -26,29 +28,29 @@ func init() {
 }
 
 func Execute() {
-	// read cookie.txt
-	cookie := ""
-	file, err := os.Open("cookie.txt")
+	// Create browser instance
+	b, err := browser.NewBrowser(false) // false means show browser window
 	if err != nil {
-		log.Errorf("Failed to open cookie file: %v", err)
+		log.Errorf("Failed to create browser: %v", err)
+		return
+	}
+	defer b.Close()
+
+	// Wait for user login
+	if err := b.WaitForLogin(); err != nil {
+		log.Errorf("Login failed: %v", err)
+		return
+	}
+
+	// Read article URLs
+	file, err := os.Open("urls.txt")
+	if err != nil {
+		log.Errorf("Failed to open article URL file: %v", err)
 		return
 	}
 	defer file.Close()
 
-	cookieScanner := bufio.NewScanner(file)
-	for cookieScanner.Scan() {
-		cookie = cookieScanner.Text()
-	}
-
-	// read urls.txt
-	file, err = os.Open("urls.txt")
-	if err != nil {
-		log.Errorf("Failed to open zhihu urls file: %v", err)
-		return
-	}
-	defer file.Close()
-
-	// get url by line
+	// Get URL list
 	articleUrls := []string{}
 	urlScanner := bufio.NewScanner(file)
 	for urlScanner.Scan() {
@@ -56,6 +58,9 @@ func Execute() {
 		articleUrls = append(articleUrls, url)
 	}
 
-	go vote(articleUrls, cookie)
-	go like(articleUrls, cookie)
+	// Execute voting
+	if err := b.VoteArticles(articleUrls); err != nil {
+		log.Errorf("Voting failed: %v", err)
+		return
+	}
 }
