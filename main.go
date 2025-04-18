@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 	"zhihu/chrome"
-	"zhihu/vote"
+	"zhihu/script"
 
 	"github.com/djherbis/times"
 	"github.com/sirupsen/logrus"
@@ -58,7 +58,7 @@ func check() {
 func main() {
 	check()
 
-	vote.Execute()
+	script.Execute()
 
 	log.Info("Press Enter to continue...")
 	reader := bufio.NewReader(os.Stdin)
