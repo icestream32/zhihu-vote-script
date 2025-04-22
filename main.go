@@ -55,9 +55,17 @@ func execute() {
 		if err := b.Vote(url); err != nil {
 			log.Errorf("Voting failed: %v", err)
 		}
+
 		time.Sleep(time.Second * 1)
+
 		if err := b.Like(url); err != nil {
 			log.Errorf("Liking failed: %v", err)
+		}
+
+		time.Sleep(time.Second * 1)
+
+		if err := b.Fav(url); err != nil {
+			log.Errorf("Fav failed: %v", err)
 		}
 	}
 }

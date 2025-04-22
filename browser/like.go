@@ -18,7 +18,6 @@ func (b *Browser) Like(url string) error {
 	var isLiked bool
 
 	err := chromedp.Run(b.ctx,
-		chromedp.Navigate(url),
 		// Wait for article body to load
 		chromedp.WaitVisible(`article`, chromedp.ByQuery),
 		// Initial scroll to middle to trigger dynamic loading
