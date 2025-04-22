@@ -40,7 +40,6 @@ func NewBrowser(headless bool) (*Browser, error) {
 		chromedp.Flag("disable-web-security", false),
 		chromedp.Flag("ignore-certificate-errors", true),
 		chromedp.Flag("start-maximized", true),
-		chromedp.Flag("window-size", "1920,1080"),
 	)
 
 	allocCtx, _ := chromedp.NewExecAllocator(context.Background(), opts...)
@@ -54,6 +53,10 @@ func NewBrowser(headless bool) (*Browser, error) {
 		ctx:    ctx,
 		cancel: cancel,
 	}, nil
+}
+
+func (b *Browser) Run() error {
+	return chromedp.Run(b.ctx)
 }
 
 func (b *Browser) Close() {

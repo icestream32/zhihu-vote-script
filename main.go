@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"os"
+	"time"
 	"zhihu/browser"
 
 	"github.com/sirupsen/logrus"
@@ -50,9 +51,14 @@ func execute() {
 	}
 
 	// Execute voting
-	if err := b.Vote(articleUrls); err != nil {
-		log.Errorf("Voting failed: %v", err)
-		return
+	for _, url := range articleUrls {
+		if err := b.Vote(url); err != nil {
+			log.Errorf("Voting failed: %v", err)
+		}
+		time.Sleep(time.Second * 1)
+		if err := b.Like(url); err != nil {
+			log.Errorf("Liking failed: %v", err)
+		}
 	}
 }
 
